@@ -17,7 +17,11 @@ namespace EpicJewels.GemEffects
         private static float delayWetTill = 0;
         private static int wet_hash =  "Wet".GetStableHashCode();
 
-        [HarmonyPatch(typeof(SEMan), nameof(SEMan.AddStatusEffect), typeof(int), typeof(bool), typeof(int), typeof(float))]
+        // Argument types must mirror SEMan.AddStatusEffect(int, bool, int, float, short) exactly.
+        // Harmony picks the overload off the full parameter list, and 1.0.7 appended the optional
+        // `short variant` that 0.221.12 did not have. A stale list resolves to no method at all and
+        // throws out of PatchAll, taking every later patch in the mod down with it.
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.AddStatusEffect), typeof(int), typeof(bool), typeof(int), typeof(float), typeof(short))]
         public static class Waterproof_SEMan_AddStatusEffect_Patch
         {
             public static bool Prefix(SEMan __instance, int nameHash)

@@ -14,7 +14,12 @@ namespace EpicJewels.EffectHelpers
     
     public static class ItemDisplay
     {
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetTooltip), typeof(ItemDrop.ItemData), typeof(int), typeof(bool), typeof(float), typeof(int))]
+        // Targets the static GetTooltip overload; the instance one is GetTooltip(int stackOverride),
+        // so the full argument list is what tells them apart. It has to track the game exactly -
+        // the trailing `bool appending` arrived in the 1.0.7 update. `appending` only suppresses
+        // the description header for the recursive m_appendToolTip call, so nothing below changes:
+        // that inner call passes a prefab ItemData that fails the IsItemEquiped check and returns early.
+        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetTooltip), typeof(ItemDrop.ItemData), typeof(int), typeof(bool), typeof(float), typeof(int), typeof(bool))]
         public static class ItemToolTipDisplayEnhancer
         {
             public static List<ItemDrop.ItemData.ItemType> allowed_item_types = new() {
